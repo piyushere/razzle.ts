@@ -1,0 +1,27 @@
+/* eslint-disable @typescript-eslint/no-var-requires */
+// eslint-disable-next-line import/no-import-module-exports
+import express from "express";
+
+// this require is necessary for server HMR to recover from error
+// tslint:disable-next-line:no-var-requires
+let app = require("./server").default;
+
+if (module.hot) {
+  module.hot.accept("./server", () => {
+    console.log("🔁  HMR Reloading `./server`...");
+    try {
+      // eslint-disable-next-line global-require
+      app = require("./server").default;
+    } catch (error) {
+      console.error(error);
+    }
+  });
+  console.info("✅  Server-side HMR Enabled!");
+}
+
+const port = process.env.PORT ? parseInt(process.env.PORT, 10) : 3000;
+
+export default express()
+  .use((req, res) => app.handle(req, res))
+  .listen(port, () => console.log(`> Started on port ${port}`))
+  .on("error", (err: Error) => err && console.error(err));
